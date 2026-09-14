@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="ProofOps — on-chain industrial maintenance attestations on Cookie Chain" />
+<title>ProofOps · Cookie Chain</title>
+<style>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f7f7f7;background:#090a0b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 75% 5%,#1d291b 0,transparent 27%),#090a0b;min-height:100vh}
+button,input,select,textarea{font:inherit}.shell{width:min(1180px,calc(100% - 36px));margin:auto}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0}.brand{font-weight:850;font-size:21px;display:flex;gap:9px;align-items:center}
+.nav-actions{display:flex;gap:10px;align-items:center}.pill,.status,.live{font-size:12px;border:1px solid #2e3330;background:#121512;border-radius:999px;padding:9px 12px;color:#a8b4aa}
+.hero{display:grid;grid-template-columns:1.4fr .8fr;gap:48px;padding:80px 0 48px;align-items:end}.eyebrow,.kicker{font-size:11px;letter-spacing:.16em;color:#97e65d;font-weight:850}
+.hero h1{font-size:clamp(42px,6vw,78px);line-height:.96;letter-spacing:-.065em;margin:15px 0 24px;max-width:900px}.hero p{font-size:18px;line-height:1.65;color:#aeb5af;max-width:680px}
+.status{display:inline-block;margin-top:10px}.stat-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #272b28;border-radius:24px;overflow:hidden;background:#101210}
+.stat{padding:24px;border-right:1px solid #272b28;border-bottom:1px solid #272b28;display:flex;flex-direction:column;gap:7px}.stat:nth-child(even){border-right:0}.stat:nth-child(n+3){border-bottom:0}
+.stat b{font-size:24px}.stat span{font-size:12px;color:#89918b}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{border:1px solid #292d2a;background:linear-gradient(180deg,#111311,#0d0f0e);border-radius:24px;padding:26px}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:22px}.card h2{margin:7px 0 0;font-size:24px}
+.live{color:#97e65d;padding:7px 10px}.form-card label{display:flex;flex-direction:column;gap:8px;color:#b8beb9;font-size:12px;font-weight:700;margin-bottom:16px}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+input,select,textarea{width:100%;background:#090a0b;color:#f7f7f7;border:1px solid #303632;border-radius:12px;padding:13px 14px;outline:none}
+textarea{resize:vertical;line-height:1.5}button{border:0;border-radius:12px;padding:11px 15px;background:#97e65d;color:#071006;font-weight:850;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}.secondary,.ghost{background:#171a18;color:#e9ece9;border:1px solid #303632}.ghost{padding:8px 11px;font-size:12px}.wide{width:100%;padding:14px}
+small{display:block;color:#737b75;line-height:1.5;margin-top:12px}.timeline{display:flex;flex-direction:column;max-height:520px;overflow:auto}
+.event{display:grid;grid-template-columns:18px 1fr;gap:12px;padding:15px 0;border-bottom:1px solid #202420}.dot{width:9px;height:9px;border-radius:999px;background:#97e65d;margin-top:6px}
+.dot.attention{background:#ffcc66}.dot.critical{background:#ff6a6a}.event-top{display:flex;justify-content:space-between;gap:12px}.event-top span{color:#747b76;font-size:11px}
+.event-type{color:#97e65d;font-size:12px;margin-top:3px}.event p{color:#aeb4af;font-size:13px;line-height:1.5}.proof-meta{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.proof-meta code{font-size:11px;color:#818983}.proof-meta a{font-size:11px;color:#d7f5c3;text-decoration:none}.empty{padding:55px 15px;text-align:center;color:#757d77}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:48px 0}.how>div{padding:24px;border-top:1px solid #323733}.how span{color:#97e65d;font-weight:900}
+.how p{color:#858d87;line-height:1.55;font-size:13px}footer{padding:24px 0 50px;color:#5f665f;font-size:12px}
+@media(max-width:850px){.hero,.grid{grid-template-columns:1fr}.hero{padding-top:40px}.pill{display:none}.how{grid-template-columns:1fr}.two{grid-template-columns:1fr}.event-top{flex-direction:column}}
+</style>
+</head>
+<body>
+<main>
+<header class="nav shell">
+  <div class="brand"><span>🍪</span> ProofOps</div>
+  <div class="nav-actions">
+    <span class="pill" id="slotPill">Cookie Chain · connecting</span>
+    <button id="walletBtn">Connect Nightly</button>
+  </div>
+</header>
+
+<section class="hero shell">
+  <div>
+    <div class="eyebrow">INDUSTRIAL PROOF-OF-WORK, LITERALLY</div>
+    <h1>Turn maintenance events into tamper-evident on-chain proofs.</h1>
+    <p>ProofOps anchors inspections, maintenance completions and incident handoffs to Cookie Chain with one signed transaction.</p>
+    <div class="status" id="status">Connect Nightly to start</div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat"><b id="balance">—</b><span>COOK balance</span></div>
+    <div class="stat"><b id="proofCount">0</b><span>verified proofs</span></div>
+    <div class="stat"><b>~1s</b><span>target finality</span></div>
+    <div class="stat"><b>SHA-256</b><span>record fingerprint</span></div>
+  </div>
+</section>
+
+<section class="grid shell">
+  <article class="card form-card">
+    <div class="card-head"><div><span class="kicker">NEW ATTESTATION</span><h2>Record a maintenance event</h2></div><span class="live">● LIVE RPC</span></div>
+    <label>Asset / equipment ID<input id="assetId" value="P-101A"></label>
+    <div class="two">
+      <label>Event type<select id="eventType">
+        <option>Preventive Maintenance</option><option>Inspection</option><option>Corrective Maintenance</option><option>Safety Check</option><option>Incident Handoff</option>
+      </select></label>
+      <label>Severity<select id="severity"><option>Normal</option><option>Attention</option><option>Critical</option></select></label>
+    </div>
+    <label>Signed record<textarea id="note" rows="5">Inspection completed; vibration and seal condition within limits.</textarea></label>
+    <button class="wide" id="submitBtn">Connect Nightly & anchor proof</button>
+    <small>Never publish secrets, personal data, or proprietary process values on-chain.</small>
+  </article>
+
+  <article class="card">
+    <div class="card-head"><div><span class="kicker">CHAIN ACTIVITY</span><h2>Recent verified proofs</h2></div><button class="ghost" id="refreshBtn">Refresh</button></div>
+    <div class="timeline" id="timeline"><div class="empty">No ProofOps records found for this wallet yet.</div></div>
+  </article>
+</section>
+
+<section class="how shell">
+  <div><span>01</span><h3>Connect Nightly</h3><p>Targets Cookie Chain through the official RPC and live genesis hash.</p></div>
+  <div><span>02</span><h3>Sign the event</h3><p>The structured record gets a SHA-256 fingerprint and a wallet signature.</p></div>
+  <div><span>03</span><h3>Verify forever</h3><p>The confirmed transaction can be independently checked in CookieScan.</p></div>
+</section>
+<footer class="shell">ProofOps prototype · Built for the Cookie Chain cApp bounty · No custody · No token approvals</footer>
+</main>
+
+<script type="module">
+import { Connection, PublicKey, Transaction, TransactionInstruction } from "https://esm.sh/@solana/web3.js@1.98.4?bundle";
+import bs58 from "https://esm.sh/bs58@6.0.0";
+
+const RPC = "https://rpc.cookiescan.io";
+const EXPLORER = "https://cookiescan.io";
+const MEMO_PROGRAM = new PublicKey("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr");
+const connection = new Connection(RPC, "confirmed");
+let account = null;
+let publicKey = null;
+let busy = false;
+
+const $ = (id) => document.getElementById(id);
+const short = (v) => v ? `${v.slice(0,5)}…${v.slice(-5)}` : "—";
+function setStatus(s){ $("status").textContent = s; }
+
+async function sha256(text){
+  const bytes = new TextEncoder().encode(text);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+async function updateSlot(){
+  try {
+    const slot = await connection.getSlot();
+    $("slotPill").textContent = `Cookie Chain · slot ${slot.toLocaleString()}`;
+  } catch {
+    $("slotPill").textContent = "Cookie Chain · RPC unavailable";
+  }
+}
+
+async function connectNightly(){
+  if (busy) return;
+  busy = true;
+  try {
+    const nightly = window.nightly?.solana;
+    if (!nightly) throw new Error("Nightly Wallet extension not detected");
+    const genesisHash = await connection.getGenesisHash();
+
+    if (nightly.genesisHash !== genesisHash && nightly.changeNetwork) {
+      setStatus("Switching Nightly to Cookie Chain…");
+      await nightly.changeNetwork({ genesisHash, url: RPC });
+    }
+
+    const result = await nightly.features["standard:connect"].connect();
+    account = result.accounts?.[0];
+    if (!account) throw new Error("No account returned by Nightly");
+    publicKey = new PublicKey(account.publicKey);
+    $("walletBtn").textContent = short(account.address);
+    $("submitBtn").textContent = "Anchor proof on Cookie Chain";
+    setStatus("Nightly connected to Cookie Chain");
+    await refresh();
+  } catch (e) {
+    setStatus(e?.message ?? String(e));
+  } finally {
+    busy = false;
+  }
+}
+
+async function refresh(){
+  await updateSlot();
+  if (!publicKey) return;
+  try {
+    const lamports = await connection.getBalance(publicKey);
+    $("balance").textContent = (lamports / 1e9).toFixed(4);
+    await loadProofs();
+  } catch (e) {
+    setStatus(`RPC error: ${e?.message ?? e}`);
+  }
+}
+
+async function submitProof(){
+  if (!account || !publicKey) return connectNightly();
+  if (busy) return;
+  busy = true;
+  $("submitBtn").disabled = true;
+  try {
+    const assetId = $("assetId").value.trim();
+    const eventType = $("eventType").value;
+    const severity = $("severity").value;
+    const note = $("note").value.trim();
+    const timestamp = new Date().toISOString();
+    const core = { app:"ProofOps", v:1, assetId, eventType, severity, note, timestamp };
+    const hash = await sha256(JSON.stringify(core));
+    const payload = JSON.stringify({ ...core, hash });
+
+    if (new TextEncoder().encode(payload).length > 900) throw new Error("Record is too large. Shorten the note.");
+
+    const ix = new TransactionInstruction({
+      programId: MEMO_PROGRAM,
+      keys: [{ pubkey: publicKey, isSigner:true, isWritable:false }],
+      data: new TextEncoder().encode(payload)
+    });
+
+    const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash("confirmed");
+    const tx = new Transaction({ feePayer:publicKey, blockhash, lastValidBlockHeight }).add(ix);
+    const serialized = tx.serialize({ requireAllSignatures:false, verifySignatures:false });
+
+    const signer = window.nightly?.solana?.features["standard:signAndSendTransaction"];
+    if (!signer) throw new Error("Nightly signAndSendTransaction feature is unavailable");
+
+    setStatus("Approve the transaction in Nightly…");
+    const chain = `solana:${await connection.getGenesisHash()}`;
+    const [sent] = await signer.signAndSendTransaction({ account, transaction:serialized, chain });
+    const signature = typeof sent?.signature === "string" ? sent.signature : sent?.signature ? bs58.encode(sent.signature) : null;
+    if (!signature) throw new Error("Wallet did not return a transaction signature");
+
+    setStatus("Confirming on Cookie Chain…");
+    await connection.confirmTransaction({ signature, blockhash, lastValidBlockHeight }, "confirmed");
+    setStatus(`Attestation confirmed: ${short(signature)}`);
+    await refresh();
+  } catch (e) {
+    setStatus(`Transaction failed: ${e?.message ?? e}`);
+  } finally {
+    busy = false;
+    $("submitBtn").disabled = false;
+  }
+}
+
+async function loadProofs(){
+  const timeline = $("timeline");
+  const sigs = await connection.getSignaturesForAddress(publicKey, {limit:20});
+  if (!sigs.length) {
+    $("proofCount").textContent = "0";
+    timeline.innerHTML = '<div class="empty">No ProofOps records found for this wallet yet.</div>';
+    return;
+  }
+  const txs = await connection.getParsedTransactions(sigs.map(s=>s.signature), {maxSupportedTransactionVersion:0});
+  const items = [];
+
+  txs.forEach((tx,i)=>{
+    const instructions = tx?.transaction?.message?.instructions ?? [];
+    for (const ix of instructions) {
+      const pid = ix.programId?.toBase58?.() ?? ix.programId?.toString?.();
+      if (pid !== MEMO_PROGRAM.toBase58()) continue;
+      const raw = typeof ix.parsed === "string" ? ix.parsed : ix.parsed?.info ?? ix.data;
+      if (typeof raw !== "string" || !raw.includes('"app":"ProofOps"')) continue;
+      try {
+        const p = JSON.parse(raw);
+        items.push({...p, signature:sigs[i]?.signature, slot:tx?.slot});
+      } catch {}
+    }
+  });
+
+  $("proofCount").textContent = String(items.length);
+  if (!items.length) {
+    timeline.innerHTML = '<div class="empty">No ProofOps records found for this wallet yet.</div>';
+    return;
+  }
+
+  timeline.innerHTML = items.map(p => `
+    <div class="event">
+      <div class="dot ${String(p.severity||"").toLowerCase()}"></div>
+      <div class="event-body">
+        <div class="event-top"><b>${escapeHtml(p.assetId)}</b><span>${new Date(p.timestamp).toLocaleString()}</span></div>
+        <div class="event-type">${escapeHtml(p.eventType)} · ${escapeHtml(p.severity)}</div>
+        <p>${escapeHtml(p.note)}</p>
+        <div class="proof-meta"><code>${String(p.hash).slice(0,18)}…</code><a href="${EXPLORER}/tx/${p.signature}" target="_blank" rel="noopener">View transaction ↗</a></div>
+      </div>
+    </div>`).join("");
+}
+
+function escapeHtml(v){
+  return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+
+$("walletBtn").addEventListener("click", connectNightly);
+$("submitBtn").addEventListener("click", submitProof);
+$("refreshBtn").addEventListener("click", refresh);
+updateSlot();
+</script>
+</body>
+</html>
